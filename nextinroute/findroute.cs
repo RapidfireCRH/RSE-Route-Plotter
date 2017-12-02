@@ -81,7 +81,7 @@ namespace nextinroute
             query.z_start = curr.coord.z > dest.coord.z ? dest.coord.z - dev : curr.coord.z - dev;
             query.z_end = curr.coord.z < dest.coord.z ? dest.coord.z + dev : curr.coord.z + dev;
             m_dbConnection.Open();
-            string sql = "SELECT starname, x, y, z FROM systems where x > " + query.x_start + "and where x < " + query.x_end + " and where y > " + query.y_start + "and where y < " + query.y_end + " and where z > " + query.z_start + "and where z < " + query.y_end + "  ORDER BY id ASC";
+            string sql = "SELECT name, x, y, z FROM systems where x > " + query.x_start + " and x < " + query.x_end + " and y > " + query.y_start + " and y < " + query.y_end + " and z > " + query.z_start + " and z < " + query.y_end + " ORDER BY id ASC";
             SQLiteCommand create = new SQLiteCommand(sql, m_dbConnection);
             SQLiteDataReader read = create.ExecuteReader();
             List<check_st> collect = new List<check_st>();
@@ -102,6 +102,7 @@ namespace nextinroute
                 ret.angle = Math.Acos((Math.Pow(distblk.a, 2) - Math.Pow(distblk.b, 2) - Math.Pow(distblk.c, 2)) / ((-2) * distblk.b * distblk.c))*(180/Math.PI);
                 collect.Add(ret);
             }
+            m_dbConnection.Close();
             check_st temp = new check_st();
             temp.star = dest;
             temp.dist = dist;
