@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,39 +30,99 @@ namespace nextinroute
 
         enum emphasis { north_south, east_west };
         enum direct { Q1, Q2, Q3, Q4 };
+        SQLiteConnection m_dbConnection;
+        bool firstrun = false;
         public struct coord_st
         {
-            public float x;
-            public float y;
-            public float z;
+            public double x;
+            public double y;
+            public double z;
         }
         public struct star_st
         {
             public string name;
             public coord_st coord;
         }
-        public static star_st findnext(star_st curr, star_st dest)
+        private struct check_st : IComparable<check_st>
         {
-            float dist = (float)Math.Sqrt(Math.Pow(curr.coord.x - dest.coord.x, 2) + Math.Pow(curr.coord.y - dest.coord.y, 2) + Math.Pow(curr.coord.z - dest.coord.z, 2));
-            float dev = dist / 3;
-            direct dir = direct.Q1;
-            if (curr.coord.x > dest.coord.x)//-?
+            public star_st star;
+            public double dist;
+            public double angle;
+            public int CompareTo(check_st other)
             {
-                if (curr.coord.z > dest.coord.z)//--
-                    dir = direct.Q4;
-                else//-+
-                    dir = direct.Q3;
+                return this.dist.CompareTo(other.dist);
             }
-            else//+?
+        }
+        private struct coord_block_st
+        {
+            public double x_start;
+            public double x_end;
+            public double y_start;
+            public double y_end;
+            public double z_start;
+            public double z_end;
+        }
+        private struct dist_block_st
+        {
+            public double a; //DB star to dest
+            public double b; //curr to db star
+            public double c; //curr to dest
+        }
+        public star_st findnext(star_st curr, star_st dest)
+        {
+            fstrun();
+            double dist = Math.Sqrt(Math.Pow(curr.coord.x - dest.coord.x, 2) + Math.Pow(curr.coord.y - dest.coord.y, 2) + Math.Pow(curr.coord.z - dest.coord.z, 2));
+            double dev = dist / 3;
+            coord_block_st query = new coord_block_st();
+            query.x_start = curr.coord.x > dest.coord.x ? dest.coord.x - dev : curr.coord.x - dev;
+            query.x_end = curr.coord.x < dest.coord.x ? dest.coord.x + dev : curr.coord.x + dev;
+            query.y_start = curr.coord.y > dest.coord.y ? dest.coord.y - dev : curr.coord.y - dev;
+            query.y_end = curr.coord.y < dest.coord.y ? dest.coord.y + dev : curr.coord.y + dev;
+            query.z_start = curr.coord.z > dest.coord.z ? dest.coord.z - dev : curr.coord.z - dev;
+            query.z_end = curr.coord.z < dest.coord.z ? dest.coord.z + dev : curr.coord.z + dev;
+            m_dbConnection.Open();
+            string sql = "SELECT starname, x, y, z FROM systems where x > " + query.x_start + "and where x < " + query.x_end + " and where y > " + query.y_start + "and where y < " + query.y_end + " and where z > " + query.z_start + "and where z < " + query.y_end + "  ORDER BY id ASC";
+            SQLiteCommand create = new SQLiteCommand(sql, m_dbConnection);
+            SQLiteDataReader read = create.ExecuteReader();
+            List<check_st> collect = new List<check_st>();
+            while (read.Read())
             {
+                check_st ret = new check_st();
+                ret.star.name = read["name"].ToString();
+                ret.star.coord.x = Double.Parse(read["x"].ToString());
+                ret.star.coord.y = Double.Parse(read["y"].ToString());
+                ret.star.coord.z = Double.Parse(read["z"].ToString());
+                ret.dist = Math.Sqrt(Math.Pow(curr.coord.x - ret.star.coord.x, 2) + Math.Pow(curr.coord.y - ret.star.coord.y, 2) + Math.Pow(curr.coord.z - ret.star.coord.z, 2));
 
-                if (curr.coord.z > dest.coord.z)//+-
-                    dir = direct.Q1;
-                else//++
-                    dir = direct.Q2;
+                dist_block_st distblk = new dist_block_st();
+                distblk.c = dist;
+                distblk.b = ret.dist;
+                distblk.a = Math.Sqrt(Math.Pow(ret.star.coord.x - dest.coord.x, 2) + Math.Pow(ret.star.coord.y - dest.coord.y, 2) + Math.Pow(ret.star.coord.z - dest.coord.z, 2));
+
+                ret.angle = Math.Acos((Math.Pow(distblk.a, 2) - Math.Pow(distblk.b, 2) - Math.Pow(distblk.c, 2)) / ((-2) * distblk.b * distblk.c))*(180/Math.PI);
+                collect.Add(ret);
             }
-            emphasis emp = (Math.Abs(curr.coord.x - dest.coord.x) > Math.Abs(curr.coord.z - dest.coord.z)) ? emphasis.east_west : emphasis.north_south;
+            check_st temp = new check_st();
+            temp.star = dest;
+            temp.dist = dist;
+            temp.angle = 0;
+            collect.Add(temp);
+            collect.Sort();
+            for (int x = 0; x != collect.Count; x++)
+                if (collect[x].angle < 20)
+                    return collect[x].star;
+
+
             return new star_st();
+        }
+        public void fstrun()
+        {
+            if (firstrun)
+                return;
+            if (!File.Exists("systemsWithoutCoordinates.sqlite"))
+                throw new FileNotFoundException("DB not in local directory. Please download new database/ move database to current directory. Current Directory: " + Directory.GetCurrentDirectory());
+            m_dbConnection = new SQLiteConnection("Data Source=systemsWithoutCoordinates.sqlite; Version=3;");
+            firstrun = true;
         }
     }
 }
