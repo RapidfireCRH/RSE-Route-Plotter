@@ -111,9 +111,7 @@ namespace nextinroute
             for (int x = 0; x != collect.Count; x++)
                 if (collect[x].angle < 20)
                     return collect[x].star;
-
-
-            return new star_st();
+            return temp.star;//This will never be reached, but just in case
         }
         public void fstrun()
         {
