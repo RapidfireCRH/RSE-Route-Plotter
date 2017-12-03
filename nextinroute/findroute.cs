@@ -81,7 +81,7 @@ namespace nextinroute
             query.z_start = curr.coord.z > dest.coord.z ? dest.coord.z - dev : curr.coord.z - dev;
             query.z_end = curr.coord.z < dest.coord.z ? dest.coord.z + dev : curr.coord.z + dev;
             m_dbConnection.Open();
-            string sql = "SELECT name, x, y, z FROM systems where x > " + query.x_start + " and x < " + query.x_end + " and y > " + query.y_start + " and y < " + query.y_end + " and z > " + query.z_start + " and z < " + query.y_end + " ORDER BY id ASC";
+            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start + " and " + query.x_end + " and y BETWEEN " + query.y_start + " and " + query.y_end + " and z BETWEEN " + query.z_start + " and " + query.z_end;
             SQLiteCommand create = new SQLiteCommand(sql, m_dbConnection);
             SQLiteDataReader read = create.ExecuteReader();
             List<check_st> collect = new List<check_st>();
@@ -99,7 +99,7 @@ namespace nextinroute
                 distblk.b = ret.dist;
                 distblk.a = Math.Sqrt(Math.Pow(ret.star.coord.x - dest.coord.x, 2) + Math.Pow(ret.star.coord.y - dest.coord.y, 2) + Math.Pow(ret.star.coord.z - dest.coord.z, 2));
 
-                ret.angle = Math.Acos((Math.Pow(distblk.a, 2) - Math.Pow(distblk.b, 2) - Math.Pow(distblk.c, 2)) / ((-2) * distblk.b * distblk.c))*(180/Math.PI);
+                ret.angle = Math.Acos((Math.Pow(distblk.a, 2) - Math.Pow(distblk.b, 2) - Math.Pow(distblk.c, 2)) / ((-2) * distblk.b * distblk.c)) * (180 / Math.PI);
                 collect.Add(ret);
             }
             m_dbConnection.Close();
@@ -109,8 +109,14 @@ namespace nextinroute
             temp.angle = 0;
             collect.Add(temp);
             collect.Sort();
+            StringBuilder bldr = new StringBuilder();
+            foreach (check_st x in collect)
+            {
+                bldr.AppendLine(x.star.name + ", " + x.star.coord.x + ", " + x.star.coord.y + ", " + x.star.coord.z + ", " + x.dist + ", " + x.angle);
+            }
+            File.WriteAllText("temp.txt", bldr.ToString());
             for (int x = 0; x != collect.Count; x++)
-                if (collect[x].angle < 20)
+                if (collect[x].angle <20)
                     return collect[x].star;
             return temp.star;//This will never be reached, but just in case
         }
