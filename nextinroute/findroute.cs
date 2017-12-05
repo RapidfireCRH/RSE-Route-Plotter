@@ -68,7 +68,7 @@ namespace nextinroute
             public double b; //curr to db star
             public double c; //curr to dest
         }
-        public star_st findnext(star_st curr, star_st dest)
+        public star_st findnext(star_st curr, star_st dest, int variation=20)
         {
             fstrun();
             double dist = Math.Sqrt(Math.Pow(curr.coord.x - dest.coord.x, 2) + Math.Pow(curr.coord.y - dest.coord.y, 2) + Math.Pow(curr.coord.z - dest.coord.z, 2));
@@ -116,11 +116,32 @@ namespace nextinroute
             }
             File.WriteAllText("temp.txt", bldr.ToString());
             for (int x = 0; x != collect.Count; x++)
-                if (collect[x].angle <20)
+                if (collect[x].angle <variation)
                     return collect[x].star;
             return temp.star;//This will never be reached, but just in case
         }
-        public void fstrun()
+        public star_st searchbyname(string starname)
+        {
+            string result = new System.Net.WebClient().DownloadString("https://www.edsm.net/api-v1/systems?systemName=" + starname + "&showCoordinates=1");
+            if (result == "[]")
+                return new star_st();
+            if (!result.Contains("coords"))
+                return new star_st();
+            star_st ret = new star_st();
+            ret.name = starname;
+            ret.coord.x = Double.Parse(result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length)));
+            ret.coord.y = Double.Parse(result.Substring(result.IndexOf(",\"y\":") + ",\"y\":".Length, result.IndexOf(",\"z\":") - (result.IndexOf(",\"y\":") + ",\"y\":".Length)));
+            ret.coord.z = Double.Parse(result.Substring(result.IndexOf(",\"z\":") + ",\"z\":".Length, result.IndexOf("}") - (result.IndexOf(",\"z\":") + ",\"z\":".Length)));
+            return ret;
+        }
+        public star_st currentlocation(string username)
+        {
+            string result = new System.Net.WebClient().DownloadString("https://www.edsm.net/api-logs-v1/get-position?commanderName=" + username);
+            if (result.Length < 13 || result.Substring(0, 13) != "{\"msgnum\":100")
+                return new star_st();
+            return searchbyname(result.Substring(result.IndexOf(",\"system\":\"") + ",\"system\":\"".Length, result.IndexOf("\",\"firstDiscover")-(result.IndexOf(",\"system\":\"") + ",\"system\":\"".Length)));
+        }
+        private void fstrun()
         {
             if (firstrun)
                 return;
@@ -129,5 +150,6 @@ namespace nextinroute
             m_dbConnection = new SQLiteConnection("Data Source=systemsWithoutCoordinates.sqlite; Version=3;");
             firstrun = true;
         }
+        
     }
 }
