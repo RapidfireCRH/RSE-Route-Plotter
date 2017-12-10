@@ -11,9 +11,9 @@ namespace nextinroute
     {
         static void Main(string[] args)
         {
-            findroute fr = new findroute(); 
-            findroute.star_st start = fr.currentlocation("slowice");
-            findroute.star_st end = fr.searchbyname("Lagoon Sector NI-S b4-10");
+            findroute fr = new findroute();
+            findroute.star_st start = fr.searchbyname("PYRIE EUQ EW-E C11-0");
+            findroute.star_st end = fr.searchbyname("BLU AOC SS-L B21-1");
             if (end.name == null || start.name == null)
                 throw new Exception("unknown name");
             findroute.star_st ret = start;
