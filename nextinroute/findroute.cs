@@ -109,12 +109,6 @@ namespace nextinroute
             temp.angle = 0;
             collect.Add(temp);
             collect.Sort();
-            StringBuilder bldr = new StringBuilder();
-            foreach (check_st x in collect)
-            {
-                bldr.AppendLine(x.star.name + ", " + x.star.coord.x + ", " + x.star.coord.y + ", " + x.star.coord.z + ", " + x.dist + ", " + x.angle);
-            }
-            File.WriteAllText("temp.txt", bldr.ToString());
             for (int x = 0; x != collect.Count; x++)
                 if (collect[x].angle <variation)
                     return collect[x].star;

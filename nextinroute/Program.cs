@@ -56,7 +56,11 @@ namespace nextinroute
         }
         static bool scanargs(string[] args)
         {
-
+            if (args.Length < 4)
+            {
+                gethelp();
+                return false;
+            }
             switch (args[0].ToLower())
             {
                 case "-u":
