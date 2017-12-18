@@ -110,7 +110,7 @@ namespace nextinroute
             collect.Add(temp);
             collect.Sort();
             for (int x = 0; x != collect.Count; x++)
-                if (collect[x].angle <variation)
+                if (collect[x].angle < variation || collect[x].dist == 0)
                     return collect[x].star;
             return temp.star;//This will never be reached, but just in case
         }
