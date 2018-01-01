@@ -68,7 +68,7 @@ namespace nextinroute
             public double b; //curr to db star
             public double c; //curr to dest
         }
-        public star_st findnext(star_st curr, star_st dest, int variation=20)
+        public star_st findnext(star_st curr, star_st dest, int variation=20, int min_dist=0)
         {
             fstrun();
             double dist = Math.Sqrt(Math.Pow(curr.coord.x - dest.coord.x, 2) + Math.Pow(curr.coord.y - dest.coord.y, 2) + Math.Pow(curr.coord.z - dest.coord.z, 2));
@@ -111,8 +111,9 @@ namespace nextinroute
             collect.Sort();
             for (int x = 0; x != collect.Count; x++)
                 if (collect[x].angle < variation)// || (collect[x].dist == 0 && collect[x].star.name != curr.name))
-                    return collect[x].star;
-            return temp.star;//This will never be reached, but just in case
+                    if (collect[x].dist > min_dist)
+                        return collect[x].star;
+            return dest;//This will never be reached, but just in case
         }
         public star_st searchbyname(string starname)
         {

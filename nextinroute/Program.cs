@@ -15,6 +15,8 @@ namespace nextinroute
         static int ver_major = 0;
         static int ver_minor = 1;
         static DateTime create_date = new DateTime(2017, 12, 10);
+        static int dev = 20;
+        static int min = 0;
         static void Main(string[] args)
         {
             if (!scanargs(args))
@@ -30,7 +32,7 @@ namespace nextinroute
             Console.WriteLine("Y: " + ret.coord.y);
             Console.WriteLine("Z: " + ret.coord.z);
             double totaldist = 0;
-            while ((ret = fr.findnext(ret, end)).name != end.name)
+            while ((ret = fr.findnext(ret, end, dev, min)).name != end.name)
             {
                 Console.Clear();
                 Console.WriteLine((list.Count + 1) + "." + ret.name);
@@ -45,7 +47,7 @@ namespace nextinroute
             list.Add(end);
 
             StringBuilder bldr = new StringBuilder();
-            bldr.AppendLine("As the Crow Flys: " + Math.Sqrt(Math.Pow(start.coord.x - end.coord.x, 2) + Math.Pow(start.coord.y - end.coord.y, 2) + Math.Pow(start.coord.z - end.coord.z, 2)) + " and total: " + totaldist);
+            bldr.AppendLine("As the Crow Flys: " + Math.Sqrt(Math.Pow(start.coord.x - end.coord.x, 2) + Math.Pow(start.coord.y - end.coord.y, 2) + Math.Pow(start.coord.z - end.coord.z, 2)) + " and total: " + totaldist + " | RSE stars eliminated: " + (list.Count -2));
             foreach (findroute.star_st x in list)
             {
                 bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z);
@@ -80,7 +82,7 @@ namespace nextinroute
                     return false;
                 default:
                     Console.WriteLine("Error parcing " + args[0]);
-                    break;
+                    return false;
             }
             switch (args[2].ToLower())
             {
@@ -96,8 +98,52 @@ namespace nextinroute
                     break;
                 default:
                     Console.WriteLine("Error parcing " + args[2]);
-                    break;
+                    return false;
             }
+            if (args.Length > 4)
+            {
+                switch (args[4].ToLower())
+                {
+                    case "-min":
+                        try
+                        {
+                            min = Int32.Parse(args[5]);
+                        }
+                        catch { }
+                        break;
+                    case "-dev":
+                        try
+                        {
+                            dev = Int32.Parse(args[5]);
+                        }
+                        catch { }
+                        break;
+                    default:
+                        return true;
+                }
+            }
+            if(args.Length > 6)
+            {
+                switch (args[6].ToLower())
+                {
+                    case "-min":
+                        try
+                        {
+                            min = Int32.Parse(args[7]);
+                        }
+                        catch { }
+                        break;
+                    case "-dev":
+                        try
+                        {
+                            dev = Int32.Parse(args[7]);
+                        }
+                        catch { }
+                        break;
+                    default:
+                        return true;
+                }
+                }
             return true;
         }
         static void gethelp()
