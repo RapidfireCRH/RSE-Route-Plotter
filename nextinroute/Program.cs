@@ -5,146 +5,165 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace nextinroute
+namespace getmeoutofhere
 {
     class Program
     {
-        static findroute.star_st start = new findroute.star_st();
-        static findroute.star_st end = new findroute.star_st();
+        //starting variables
         static findroute fr = new findroute();
-        static int ver_major = 0;
-        static int ver_minor = 1;
-        static DateTime create_date = new DateTime(2017, 12, 10);
-        static int dev = 20;
-        static int min = 0;
+        static findroute.star_st start = new findroute.star_st();
+        static findroute.star_st destination = new findroute.star_st();
+        static int numofjumps = 0;//Zen only
+        static int maxdist = 0;//route only
+        static int maxdev = 20;//route only
+
+        //program toggle
+        enum state {route = 0, zen = 1 }
+        static state prog = state.route;
+
+        //version
+        static DateTime create_date = new DateTime(2018, 1, 2);
+        static int ver_major = 1;
+        static int ver_minor = 2;
         static void Main(string[] args)
         {
             if (!scanargs(args))
                 return;
-            if (end.name == null || start.name == null)
-                return;
-            findroute.star_st ret = start;
+
+            
             List<findroute.star_st> list = new List<findroute.star_st>();
             list.Add(start);
             Console.Clear();
-            Console.WriteLine(ret.name);
-            Console.WriteLine("X: " + ret.coord.x);
-            Console.WriteLine("Y: " + ret.coord.y);
-            Console.WriteLine("Z: " + ret.coord.z);
+            Console.WriteLine(start.name);
+            Console.WriteLine("X: " + start.coord.x);
+            Console.WriteLine("Y: " + start.coord.y);
+            Console.WriteLine("Z: " + start.coord.z);
             double totaldist = 0;
-            while ((ret = fr.findnext(ret, end, dev, min)).name != end.name)
+            switch (prog)
             {
-                Console.Clear();
-                Console.WriteLine((list.Count + 1) + "." + ret.name);
-                Console.WriteLine("X: " + ret.coord.x);
-                Console.WriteLine("Y: " + ret.coord.y);
-                Console.WriteLine("Z: " + ret.coord.z);
-                Console.WriteLine("Distance from previous: " + Math.Floor(Math.Sqrt(Math.Pow(list[list.Count - 1].coord.x - ret.coord.x, 2) + Math.Pow(list[list.Count - 1].coord.y - ret.coord.y, 2) + Math.Pow(list[list.Count - 1].coord.z - ret.coord.z, 2))) + "ly");
-                totaldist += Math.Sqrt(Math.Pow(list[list.Count - 1].coord.x - ret.coord.x, 2) + Math.Pow(list[list.Count - 1].coord.y - ret.coord.y, 2) + Math.Pow(list[list.Count - 1].coord.z - ret.coord.z, 2));
-                list.Add(ret);
+                case state.route:
+                    findroute.star_st ret = start;
+                    while ((ret = fr.findnext(ret, destination, maxdev, maxdist)).name != destination.name)
+                    {
+                        Console.Clear();
+                        Console.WriteLine((list.Count + 1) + "." + ret.name);
+                        Console.WriteLine("X: " + ret.coord.x);
+                        Console.WriteLine("Y: " + ret.coord.y);
+                        Console.WriteLine("Z: " + ret.coord.z);
+                        Console.WriteLine("Distance from previous: " + list[list.Count - 1].distance(ret) + "ly");
+                        totaldist += list[list.Count - 1].distance(ret);
+                        list.Add(ret);
+                    }
+                    totaldist += list[list.Count - 1].distance(destination);
+                    list.Add(destination);
+                    break;
+                case state.zen:
+                    findroute.star_st zenret = start;
+                    while (list.Count!= numofjumps+1)
+                    {
+                        zenret = fr.zen(zenret, maxdist == 0 ? 18000 : maxdist);
+                        Console.Clear();
+                        Console.WriteLine((list.Count + 1) + "." + zenret.name);
+                        Console.WriteLine("X: " + zenret.coord.x);
+                        Console.WriteLine("Y: " + zenret.coord.y);
+                        Console.WriteLine("Z: " + zenret.coord.z);
+                        Console.WriteLine("Distance from previous: " + list[list.Count - 1].distance(zenret) + "ly");
+                        totaldist += list[list.Count - 1].distance(zenret);
+                        list.Add(zenret);
+                    }
+                    break;
             }
-            totaldist += Math.Sqrt(Math.Pow(list[list.Count - 1].coord.x - end.coord.x, 2) + Math.Pow(list[list.Count - 1].coord.y - end.coord.y, 2) + Math.Pow(list[list.Count - 1].coord.z - end.coord.z, 2));
-            list.Add(end);
-
             StringBuilder bldr = new StringBuilder();
-            bldr.AppendLine("As the Crow Flys: " + Math.Sqrt(Math.Pow(start.coord.x - end.coord.x, 2) + Math.Pow(start.coord.y - end.coord.y, 2) + Math.Pow(start.coord.z - end.coord.z, 2)) + " and total: " + totaldist + " | RSE stars eliminated: " + (list.Count -2));
-            foreach (findroute.star_st x in list)
+            
+            if (prog == state.zen)
             {
-                bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z);
+                bldr.AppendLine("total distance: " + totaldist + " | RSE stars eliminated: " + (list.Count - 1));
+                foreach (findroute.star_st x in list)
+                {
+                    bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z);
+                }
+                File.WriteAllText("zen-" + start.name + "route.txt", bldr.ToString());
+                Console.WriteLine();
+                Console.WriteLine("This is also available here: zen-" + start.name + "route.txt", bldr.ToString());
             }
-            File.WriteAllText(start.name + "-" + end.name + "route.txt", bldr.ToString());
-            Console.WriteLine();
-            Console.WriteLine("This is also available here: " + start.name + "-" + end.name + "route.txt");
+            if (prog == state.route)
+            {
+                bldr.AppendLine("As the Crow Flys: " + start.distance(destination) + " and total: " + totaldist + " | RSE stars eliminated: " + (list.Count - 2));
+                foreach (findroute.star_st x in list)
+                {
+                    bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z);
+                }
+                File.WriteAllText(start.name + "-" + destination.name + "route.txt", bldr.ToString());
+                Console.WriteLine();
+                Console.WriteLine("This is also available here: " + start.name + "-" + destination.name + "route.txt");
+            }
         }
         static bool scanargs(string[] args)
         {
-            if (args.Length < 4)
+            if (args.Length < 2)
             {
                 gethelp();
                 return false;
             }
-            switch (args[0].ToLower())
+            for (int i = 0; i != args.Length;)
             {
-                case "-u":
-                    start = fr.currentlocation(args[1]);
-                    if (start.name == null)
-                        Console.WriteLine("Error parcing " + args[1]);
-                    break;
-                case "-s":
-                    start = fr.searchbyname(args[1]);
-                    if (start.name == null)
-                        Console.WriteLine("Error parcing " + args[1]);
-                    break;
-                case "-h":
-                case "-help":
-                case "/help":
-                    gethelp();
-                    return false;
-                default:
-                    Console.WriteLine("Error parcing " + args[0]);
-                    return false;
-            }
-            switch (args[2].ToLower())
-            {
-                case "-u":
-                    end = fr.currentlocation(args[3]);
-                    if (end.name == null)
-                        Console.WriteLine("Error parcing " + args[3]);
-                    break;
-                case "-s":
-                    end = fr.searchbyname(args[3]);
-                    if (end.name == null)
-                        Console.WriteLine("Error parcing " + args[3]);
-                    break;
-                default:
-                    Console.WriteLine("Error parcing " + args[2]);
-                    return false;
-            }
-            if (args.Length > 4)
-            {
-                switch (args[4].ToLower())
+                try
                 {
-                    case "-min":
-                        try
-                        {
-                            min = Int32.Parse(args[5]);
-                        }
-                        catch { }
-                        break;
-                    case "-dev":
-                        try
-                        {
-                            dev = Int32.Parse(args[5]);
-                        }
-                        catch { }
-                        break;
-                    default:
-                        return true;
+                    switch (args[i].ToLower())
+                    {
+                        case "-s":
+                            if (start.name != null)
+                                destination = fr.searchbyname(args[i + 1].ToLower());
+                            else
+                                start = fr.searchbyname(args[i + 1].ToLower());
+                            i = i + 2;
+                            break;
+                        case "-u":
+                            if (start.name != null)
+                                destination = fr.currentlocation(args[i + 1].ToLower());
+                            else
+                                start = fr.currentlocation(args[i + 1].ToLower());
+                            i = i + 2;
+                            break;
+                        case "-j":
+                            numofjumps = Int32.Parse(args[++i].ToLower());
+                            i++;
+                            break;
+                        case "-dev":
+                            maxdev = Int32.Parse(args[++i].ToLower());
+                            i++;
+                            break;
+                        case "-dist":
+                            maxdist = Int32.Parse(args[++i].ToLower());
+                            i++;
+                            break;
+                        case "-help":
+                            gethelp();
+                            return false;
+                        case "-zen":
+                            prog = state.zen;
+                            i++;
+                            break;
+                        case "-route":
+                            prog = state.route;
+                            i++;
+                            break;
+                        default:
+                            i++;
+                            break;
+                    }
                 }
+                catch { i++; }
             }
-            if(args.Length > 6)
-            {
-                switch (args[6].ToLower())
-                {
-                    case "-min":
-                        try
-                        {
-                            min = Int32.Parse(args[7]);
-                        }
-                        catch { }
-                        break;
-                    case "-dev":
-                        try
-                        {
-                            dev = Int32.Parse(args[7]);
-                        }
-                        catch { }
-                        break;
-                    default:
-                        return true;
-                }
-                }
-            return true;
+            if (prog == state.zen)
+                if (start.name != null)
+                    return true;
+            if (prog == state.route)
+                if (destination.name != null)
+                    return true;
+            Console.WriteLine("Invalid or missing args.");
+            gethelp();
+            return false;
         }
         static void gethelp()
         {
@@ -152,13 +171,11 @@ namespace nextinroute
             Console.WriteLine("Used to plot route between two points using systemsWithoutCoordinates.sqlite. That can be located here:");
             Console.WriteLine("https://www.dropbox.com/s/zs3k89e4sl07gzc/systemsWithoutCoordinates.sqlite?dl=0");
             Console.WriteLine("Usage:");
-            Console.WriteLine("    -u username : Search by user location (Requires EDSM Public profile)");
-            Console.WriteLine("    -s starname : search by starname");
-            Console.WriteLine("nextinroute.exe -u slowice -s colonia");
-            Console.WriteLine("Please create an issue on github with any issues you might have:");
-            Console.WriteLine("https://github.com/RapidfireCRH/nextinroute/issues");
+            Console.WriteLine("    -zen : Zen mode, plot random 20k plots");
+            Console.WriteLine("    -route : Route mode, plot between points");
+            Console.WriteLine("nextinroute.exe -route -u slowice -s colonia");
+            Console.WriteLine("For full usage information, or to report an issue, please locate us on github:");
+            Console.WriteLine("https://github.com/RapidfireCRH/nextinroute");
         }
     }
 }
-
-
