@@ -13,7 +13,7 @@ namespace getmeoutofhere
         static findroute fr = new findroute();
         static findroute.star_st start = new findroute.star_st();
         static findroute.star_st destination = new findroute.star_st();
-        static int numofjumps = 0;//Zen only
+        static int numofjumps = 20;//Zen only
         static int maxdist = 0;//route only
         static int maxdev = 20;//route only
 
