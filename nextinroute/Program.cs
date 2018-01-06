@@ -30,8 +30,8 @@ namespace getmeoutofhere
         {
             if (!scanargs(args))
                 return;
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            
             List<findroute.star_st> list = new List<findroute.star_st>();
             list.Add(start);
             Console.Clear();
@@ -78,25 +78,35 @@ namespace getmeoutofhere
             
             if (prog == state.zen)
             {
-                bldr.AppendLine("total distance: " + totaldist.ToString(CultureInfo.InvariantCulture) + " | RSE stars eliminated: " + (list.Count - 1).ToString(CultureInfo.InvariantCulture));
+                bldr.AppendLine("total distance: " + totaldist + " | RSE stars eliminated: " + (list.Count - 1));
+                findroute.star_st prev = new findroute.star_st();
                 foreach (findroute.star_st x in list)
                 {
-                    bldr.AppendLine(x.name + ", " + x.coord.x.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.y.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.z.ToString(CultureInfo.InvariantCulture));
+                    double dist = 0;
+                    if (prev.name != null)
+                        dist = prev.distance(x);
+                    bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z + ", " + dist);
+                    prev = x;
                 }
-                File.WriteAllText("zen-" + start.name + "route.txt", bldr.ToString());
+                File.WriteAllText("zen-" + start.name + "route.csv", bldr.ToString());
                 Console.WriteLine();
-                Console.WriteLine("This is also available here: zen-" + start.name + "route.txt", bldr.ToString());
+                Console.WriteLine("This is also available here: zen-" + start.name + "route.csv", bldr.ToString());
             }
             if (prog == state.route)
             {
-                bldr.AppendLine("As the Crow Flys: " + start.distance(destination).ToString(CultureInfo.InvariantCulture) + " and total: " + totaldist.ToString(CultureInfo.InvariantCulture) + " | RSE stars eliminated: " + (list.Count - 2).ToString(CultureInfo.InvariantCulture));
+                bldr.AppendLine("As the Crow Flys: " + start.distance(destination) + " and total: " + totaldist + " | RSE stars eliminated: " + (list.Count - 2));
+                findroute.star_st prev = new findroute.star_st();
                 foreach (findroute.star_st x in list)
                 {
-                    bldr.AppendLine(x.name + ", " + x.coord.x.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.y.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.z.ToString(CultureInfo.InvariantCulture));
+                    double dist = 0;
+                    if (prev.name != null)
+                        dist = prev.distance(x);
+                    bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z + ", " + dist);
+                    prev = x;
                 }
-                File.WriteAllText(start.name + "-" + destination.name + "route.txt", bldr.ToString());
+                File.WriteAllText(start.name + "-" + destination.name + "route.csv", bldr.ToString());
                 Console.WriteLine();
-                Console.WriteLine("This is also available here: " + start.name + "-" + destination.name + "route.txt");
+                Console.WriteLine("This is also available here: " + start.name + "-" + destination.name + "route.csv");
             }
         }
         static bool scanargs(string[] args)
