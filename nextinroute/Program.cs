@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -77,10 +78,10 @@ namespace getmeoutofhere
             
             if (prog == state.zen)
             {
-                bldr.AppendLine("total distance: " + totaldist + " | RSE stars eliminated: " + (list.Count - 1));
+                bldr.AppendLine("total distance: " + totaldist.ToString(CultureInfo.InvariantCulture) + " | RSE stars eliminated: " + (list.Count - 1).ToString(CultureInfo.InvariantCulture));
                 foreach (findroute.star_st x in list)
                 {
-                    bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z);
+                    bldr.AppendLine(x.name + ", " + x.coord.x.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.y.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.z.ToString(CultureInfo.InvariantCulture));
                 }
                 File.WriteAllText("zen-" + start.name + "route.txt", bldr.ToString());
                 Console.WriteLine();
@@ -88,10 +89,10 @@ namespace getmeoutofhere
             }
             if (prog == state.route)
             {
-                bldr.AppendLine("As the Crow Flys: " + start.distance(destination) + " and total: " + totaldist + " | RSE stars eliminated: " + (list.Count - 2));
+                bldr.AppendLine("As the Crow Flys: " + start.distance(destination).ToString(CultureInfo.InvariantCulture) + " and total: " + totaldist.ToString(CultureInfo.InvariantCulture) + " | RSE stars eliminated: " + (list.Count - 2).ToString(CultureInfo.InvariantCulture));
                 foreach (findroute.star_st x in list)
                 {
-                    bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z);
+                    bldr.AppendLine(x.name + ", " + x.coord.x.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.y.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.z.ToString(CultureInfo.InvariantCulture));
                 }
                 File.WriteAllText(start.name + "-" + destination.name + "route.txt", bldr.ToString());
                 Console.WriteLine();

@@ -28,7 +28,7 @@ namespace getmeoutofhere
 
         enum emphasis { north_south, east_west };
         enum direct { Q1, Q2, Q3, Q4 };
-
+        public CultureInfo period = CultureInfo.InvariantCulture;
         SQLiteConnection m_dbConnection;
         List<star_st> database = new List<star_st>();
         bool firstrun = false;
@@ -118,13 +118,7 @@ namespace getmeoutofhere
             query.z_end = curr.coord.z < dest.coord.z ? dest.coord.z + dev : curr.coord.z + dev;
             m_dbConnection.Open();
             
-            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " 
-                + query.x_start.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator),'.') 
-                + " and " + query.x_end.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.')
-                + " and y BETWEEN " + query.y_start.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.')
-                + " and " + query.y_end.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.')
-                + " and z BETWEEN " + query.z_start.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.')
-                + " and " + query.z_end.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.');
+            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start.ToString(CultureInfo.InvariantCulture) + " and " + query.x_end.ToString(CultureInfo.InvariantCulture) + " and y BETWEEN " + query.y_start.ToString(CultureInfo.InvariantCulture) + " and " + query.y_end.ToString(CultureInfo.InvariantCulture) + " and z BETWEEN " + query.z_start.ToString(CultureInfo.InvariantCulture) + " and " + query.z_end.ToString(CultureInfo.InvariantCulture);
             //Console.WriteLine(curr.name + "|" + curr.coord.x+"|" + curr.coord.y+ "|" + curr.coord.z);
             //Console.WriteLine(dest.name + "|" + dest.coord.x + "|" + dest.coord.y + "|" + dest.coord.z);
             //Console.WriteLine(variation);
@@ -137,9 +131,9 @@ namespace getmeoutofhere
             {
                 check_st ret = new check_st();
                 ret.star.name = read["name"].ToString();
-                ret.star.coord.x = Double.Parse(read["x"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
-                ret.star.coord.y = Double.Parse(read["y"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
-                ret.star.coord.z = Double.Parse(read["z"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                ret.star.coord.x = Double.Parse(read["x"].ToString(), CultureInfo.InvariantCulture);
+                ret.star.coord.y = Double.Parse(read["y"].ToString(), CultureInfo.InvariantCulture);
+                ret.star.coord.z = Double.Parse(read["z"].ToString(), CultureInfo.InvariantCulture);
                 ret.dist = ret.star.distance(curr);
                 ret.angle = curr.angle(ret.star, dest);
                 collect.Add(ret);
@@ -188,9 +182,9 @@ namespace getmeoutofhere
             {
                 star_st ret = new star_st();
                 ret.name = read["name"].ToString();
-                ret.coord.x = Double.Parse(read["x"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
-                ret.coord.y = Double.Parse(read["y"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
-                ret.coord.z = Double.Parse(read["z"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                ret.coord.x = Double.Parse(read["x"].ToString(), CultureInfo.InvariantCulture);
+                ret.coord.y = Double.Parse(read["y"].ToString(), CultureInfo.InvariantCulture);
+                ret.coord.z = Double.Parse(read["z"].ToString(), CultureInfo.InvariantCulture);
                 database.Add(ret);
             }
             m_dbConnection.Close();
@@ -204,9 +198,9 @@ namespace getmeoutofhere
                 return new star_st();
             star_st ret = new star_st();
             ret.name = starname;
-            ret.coord.x = Double.Parse((result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length))).Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
-            ret.coord.y = Double.Parse((result.Substring(result.IndexOf(",\"y\":") + ",\"y\":".Length, result.IndexOf(",\"z\":") - (result.IndexOf(",\"y\":") + ",\"y\":".Length))).Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
-            ret.coord.z = Double.Parse((result.Substring(result.IndexOf(",\"z\":") + ",\"z\":".Length, result.IndexOf("}") - (result.IndexOf(",\"z\":") + ",\"z\":".Length))).Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+            ret.coord.x = Double.Parse((result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length))).ToString(), CultureInfo.InvariantCulture);
+            ret.coord.y = Double.Parse((result.Substring(result.IndexOf(",\"y\":") + ",\"y\":".Length, result.IndexOf(",\"z\":") - (result.IndexOf(",\"y\":") + ",\"y\":".Length))).ToString(), CultureInfo.InvariantCulture);
+            ret.coord.z = Double.Parse((result.Substring(result.IndexOf(",\"z\":") + ",\"z\":".Length, result.IndexOf("}") - (result.IndexOf(",\"z\":") + ",\"z\":".Length))).ToString(), CultureInfo.InvariantCulture); ;
             numofchecks++;
             return ret;
         }
