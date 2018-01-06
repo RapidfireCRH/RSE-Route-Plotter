@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace getmeoutofhere
 {
@@ -119,7 +117,19 @@ namespace getmeoutofhere
             query.z_start = curr.coord.z > dest.coord.z ? dest.coord.z - dev : curr.coord.z - dev;
             query.z_end = curr.coord.z < dest.coord.z ? dest.coord.z + dev : curr.coord.z + dev;
             m_dbConnection.Open();
-            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start + " and " + query.x_end + " and y BETWEEN " + query.y_start + " and " + query.y_end + " and z BETWEEN " + query.z_start + " and " + query.z_end;
+            
+            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " 
+                + query.x_start.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator),'.') 
+                + " and " + query.x_end.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.')
+                + " and y BETWEEN " + query.y_start.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.')
+                + " and " + query.y_end.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.')
+                + " and z BETWEEN " + query.z_start.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.')
+                + " and " + query.z_end.ToString().Replace(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator), '.');
+            //Console.WriteLine(curr.name + "|" + curr.coord.x+"|" + curr.coord.y+ "|" + curr.coord.z);
+            //Console.WriteLine(dest.name + "|" + dest.coord.x + "|" + dest.coord.y + "|" + dest.coord.z);
+            //Console.WriteLine(variation);
+            //Console.WriteLine(min_dist);
+            //Console.WriteLine(sql);
             SQLiteCommand create = new SQLiteCommand(sql, m_dbConnection);
             SQLiteDataReader read = create.ExecuteReader();
             List<check_st> collect = new List<check_st>();
@@ -127,9 +137,9 @@ namespace getmeoutofhere
             {
                 check_st ret = new check_st();
                 ret.star.name = read["name"].ToString();
-                ret.star.coord.x = Double.Parse(read["x"].ToString());
-                ret.star.coord.y = Double.Parse(read["y"].ToString());
-                ret.star.coord.z = Double.Parse(read["z"].ToString());
+                ret.star.coord.x = Double.Parse(read["x"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                ret.star.coord.y = Double.Parse(read["y"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                ret.star.coord.z = Double.Parse(read["z"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
                 ret.dist = ret.star.distance(curr);
                 ret.angle = curr.angle(ret.star, dest);
                 collect.Add(ret);
@@ -178,9 +188,9 @@ namespace getmeoutofhere
             {
                 star_st ret = new star_st();
                 ret.name = read["name"].ToString();
-                ret.coord.x = Double.Parse(read["x"].ToString());
-                ret.coord.y = Double.Parse(read["y"].ToString());
-                ret.coord.z = Double.Parse(read["z"].ToString());
+                ret.coord.x = Double.Parse(read["x"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                ret.coord.y = Double.Parse(read["y"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                ret.coord.z = Double.Parse(read["z"].ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
                 database.Add(ret);
             }
             m_dbConnection.Close();
@@ -194,9 +204,9 @@ namespace getmeoutofhere
                 return new star_st();
             star_st ret = new star_st();
             ret.name = starname;
-            ret.coord.x = Double.Parse(result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length)));
-            ret.coord.y = Double.Parse(result.Substring(result.IndexOf(",\"y\":") + ",\"y\":".Length, result.IndexOf(",\"z\":") - (result.IndexOf(",\"y\":") + ",\"y\":".Length)));
-            ret.coord.z = Double.Parse(result.Substring(result.IndexOf(",\"z\":") + ",\"z\":".Length, result.IndexOf("}") - (result.IndexOf(",\"z\":") + ",\"z\":".Length)));
+            ret.coord.x = Double.Parse((result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length))).Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+            ret.coord.y = Double.Parse((result.Substring(result.IndexOf(",\"y\":") + ",\"y\":".Length, result.IndexOf(",\"z\":") - (result.IndexOf(",\"y\":") + ",\"y\":".Length))).Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+            ret.coord.z = Double.Parse((result.Substring(result.IndexOf(",\"z\":") + ",\"z\":".Length, result.IndexOf("}") - (result.IndexOf(",\"z\":") + ",\"z\":".Length))).Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
             numofchecks++;
             return ret;
         }

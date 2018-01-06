@@ -120,9 +120,9 @@ namespace getmeoutofhere
                             break;
                         case "-u":
                             if (start.name != null)
-                                destination = fr.currentlocation(args[i + 1].ToLower());
+                                destination = fr.currentlocation(args[i + 1]);
                             else
-                                start = fr.currentlocation(args[i + 1].ToLower());
+                                start = fr.currentlocation(args[i + 1]);
                             i = i + 2;
                             break;
                         case "-j":
