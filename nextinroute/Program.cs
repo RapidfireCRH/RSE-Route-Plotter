@@ -31,7 +31,6 @@ namespace getmeoutofhere
             if (!scanargs(args))
                 return;
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-
             List<findroute.star_st> list = new List<findroute.star_st>();
             list.Add(start);
             Console.Clear();
@@ -40,6 +39,7 @@ namespace getmeoutofhere
             Console.WriteLine("Y: " + start.coord.y);
             Console.WriteLine("Z: " + start.coord.z);
             double totaldist = 0;
+            StringBuilder bldr = new StringBuilder();
             switch (prog)
             {
                 case state.route:
@@ -57,6 +57,19 @@ namespace getmeoutofhere
                     }
                     totaldist += list[list.Count - 1].distance(destination);
                     list.Add(destination);
+                    bldr.AppendLine("As the Crow Flys: " + start.distance(destination) + " and total: " + totaldist + " | RSE stars eliminated: " + (list.Count - 2));
+                    findroute.star_st prev = new findroute.star_st();
+                    foreach (findroute.star_st x in list)
+                    {
+                        double dist = 0;
+                        if (prev.name != null)
+                            dist = prev.distance(x);
+                        bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z + ", " + dist);
+                        prev = x;
+                    }
+                    File.WriteAllText(start.name + "-" + destination.name + "route.csv", bldr.ToString());
+                    Console.WriteLine();
+                    Console.WriteLine("This is also available here: " + start.name + "-" + destination.name + "route.csv");
                     break;
                 case state.zen:
                     findroute.star_st zenret = start;
@@ -72,41 +85,20 @@ namespace getmeoutofhere
                         totaldist += list[list.Count - 1].distance(zenret);
                         list.Add(zenret);
                     }
+                    bldr.AppendLine("total distance: " + totaldist + " | RSE stars eliminated: " + (list.Count - 1));
+                    findroute.star_st prevbldr = new findroute.star_st();
+                    foreach (findroute.star_st x in list)
+                    {
+                        double dist = 0;
+                        if (prevbldr.name != null)
+                            dist = prevbldr.distance(x);
+                        bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z + ", " + dist);
+                        prev = x;
+                    }
+                    File.WriteAllText("zen-" + start.name + "route.csv", bldr.ToString());
+                    Console.WriteLine();
+                    Console.WriteLine("This is also available here: zen-" + start.name + "route.csv", bldr.ToString());
                     break;
-            }
-            StringBuilder bldr = new StringBuilder();
-            
-            if (prog == state.zen)
-            {
-                bldr.AppendLine("total distance: " + totaldist + " | RSE stars eliminated: " + (list.Count - 1));
-                findroute.star_st prev = new findroute.star_st();
-                foreach (findroute.star_st x in list)
-                {
-                    double dist = 0;
-                    if (prev.name != null)
-                        dist = prev.distance(x);
-                    bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z + ", " + dist);
-                    prev = x;
-                }
-                File.WriteAllText("zen-" + start.name + "route.csv", bldr.ToString());
-                Console.WriteLine();
-                Console.WriteLine("This is also available here: zen-" + start.name + "route.csv", bldr.ToString());
-            }
-            if (prog == state.route)
-            {
-                bldr.AppendLine("As the Crow Flys: " + start.distance(destination) + " and total: " + totaldist + " | RSE stars eliminated: " + (list.Count - 2));
-                findroute.star_st prev = new findroute.star_st();
-                foreach (findroute.star_st x in list)
-                {
-                    double dist = 0;
-                    if (prev.name != null)
-                        dist = prev.distance(x);
-                    bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z + ", " + dist);
-                    prev = x;
-                }
-                File.WriteAllText(start.name + "-" + destination.name + "route.csv", bldr.ToString());
-                Console.WriteLine();
-                Console.WriteLine("This is also available here: " + start.name + "-" + destination.name + "route.csv");
             }
         }
         static bool scanargs(string[] args)
@@ -175,18 +167,19 @@ namespace getmeoutofhere
             Console.WriteLine("Invalid or missing args.");
             gethelp();
             return false;
-        }
-        static void gethelp()
-        {
-            Console.WriteLine("nextinroute V" + ver_major + "." + ver_minor + " created:" + create_date.ToShortDateString());
-            Console.WriteLine("Used to plot route between two points using systemsWithoutCoordinates.sqlite. That can be located here:");
-            Console.WriteLine("https://www.dropbox.com/s/zs3k89e4sl07gzc/systemsWithoutCoordinates.sqlite?dl=0");
-            Console.WriteLine("Usage:");
-            Console.WriteLine("    -zen : Zen mode, plot random 20k plots");
-            Console.WriteLine("    -route : Route mode, plot between points");
-            Console.WriteLine("nextinroute.exe -route -u slowice -s colonia");
-            Console.WriteLine("For full usage information, or to report an issue, please locate us on github:");
-            Console.WriteLine("https://github.com/RapidfireCRH/nextinroute");
+
+            void gethelp()
+            {
+                Console.WriteLine("nextinroute V" + ver_major + "." + ver_minor + " created:" + create_date.ToShortDateString());
+                Console.WriteLine("Used to plot route between two points using systemsWithoutCoordinates.sqlite. That can be located here:");
+                Console.WriteLine("https://www.dropbox.com/s/zs3k89e4sl07gzc/systemsWithoutCoordinates.sqlite?dl=0");
+                Console.WriteLine("Usage:");
+                Console.WriteLine("    -zen : Zen mode, plot random 20k plots");
+                Console.WriteLine("    -route : Route mode, plot between points");
+                Console.WriteLine("nextinroute.exe -route -u slowice -s colonia");
+                Console.WriteLine("For full usage information, or to report an issue, please locate us on github:");
+                Console.WriteLine("https://github.com/RapidfireCRH/nextinroute");
+            }
         }
     }
 }
