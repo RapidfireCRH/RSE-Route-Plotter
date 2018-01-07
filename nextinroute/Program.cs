@@ -30,14 +30,13 @@ namespace getmeoutofhere
         {
             if (!scanargs(args))
                 return;
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             List<findroute.star_st> list = new List<findroute.star_st>();
             list.Add(start);
             Console.Clear();
             Console.WriteLine(start.name);
-            Console.WriteLine("X: " + start.coord.x);
-            Console.WriteLine("Y: " + start.coord.y);
-            Console.WriteLine("Z: " + start.coord.z);
+            Console.WriteLine("X: " + start.coord.x.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+            Console.WriteLine("Y: " + start.coord.y.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+            Console.WriteLine("Z: " + start.coord.z.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
             double totaldist = 0;
             StringBuilder bldr = new StringBuilder();
             switch (prog)
@@ -48,10 +47,10 @@ namespace getmeoutofhere
                     {
                         Console.Clear();
                         Console.WriteLine((list.Count + 1) + "." + ret.name);
-                        Console.WriteLine("X: " + ret.coord.x);
-                        Console.WriteLine("Y: " + ret.coord.y);
-                        Console.WriteLine("Z: " + ret.coord.z);
-                        Console.WriteLine("Distance from previous: " + list[list.Count - 1].distance(ret) + "ly");
+                        Console.WriteLine("X: " + ret.coord.x.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                        Console.WriteLine("Y: " + ret.coord.y.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                        Console.WriteLine("Z: " + ret.coord.z.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                        Console.WriteLine("Distance from previous: " + list[list.Count - 1].distance(ret).ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)) + "ly");
                         totaldist += list[list.Count - 1].distance(ret);
                         list.Add(ret);
                     }
@@ -78,10 +77,10 @@ namespace getmeoutofhere
                         zenret = fr.zen(zenret, maxdist == 0 ? 18000 : maxdist);
                         Console.Clear();
                         Console.WriteLine((list.Count + 1) + "." + zenret.name);
-                        Console.WriteLine("X: " + zenret.coord.x);
-                        Console.WriteLine("Y: " + zenret.coord.y);
-                        Console.WriteLine("Z: " + zenret.coord.z);
-                        Console.WriteLine("Distance from previous: " + list[list.Count - 1].distance(zenret) + "ly");
+                        Console.WriteLine("X: " + zenret.coord.x.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                        Console.WriteLine("Y: " + zenret.coord.y.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                        Console.WriteLine("Z: " + zenret.coord.z.ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)));
+                        Console.WriteLine("Distance from previous: " + list[list.Count - 1].distance(zenret).ToString().Replace('.', Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)) + "ly");
                         totaldist += list[list.Count - 1].distance(zenret);
                         list.Add(zenret);
                     }

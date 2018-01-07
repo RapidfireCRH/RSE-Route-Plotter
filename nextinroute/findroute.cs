@@ -191,7 +191,6 @@ namespace getmeoutofhere
         }
         public star_st searchbyname(string starname)
         {
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             string result = new System.Net.WebClient().DownloadString("https://www.edsm.net/api-v1/systems?systemName=" + starname + "&showCoordinates=1");
             if (result == "[]")
                 return new star_st();
@@ -199,9 +198,9 @@ namespace getmeoutofhere
                 return new star_st();
             star_st ret = new star_st();
             ret.name = starname;
-            ret.coord.x = Double.Parse((result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length))));
-            ret.coord.y = Double.Parse((result.Substring(result.IndexOf(",\"y\":") + ",\"y\":".Length, result.IndexOf(",\"z\":") - (result.IndexOf(",\"y\":") + ",\"y\":".Length))));
-            ret.coord.z = Double.Parse((result.Substring(result.IndexOf(",\"z\":") + ",\"z\":".Length, result.IndexOf("}") - (result.IndexOf(",\"z\":") + ",\"z\":".Length))));
+            ret.coord.x = Double.Parse((result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length))),CultureInfo.InvariantCulture);
+            ret.coord.y = Double.Parse((result.Substring(result.IndexOf(",\"y\":") + ",\"y\":".Length, result.IndexOf(",\"z\":") - (result.IndexOf(",\"y\":") + ",\"y\":".Length))), CultureInfo.InvariantCulture);
+            ret.coord.z = Double.Parse((result.Substring(result.IndexOf(",\"z\":") + ",\"z\":".Length, result.IndexOf("}") - (result.IndexOf(",\"z\":") + ",\"z\":".Length))), CultureInfo.InvariantCulture);
             numofchecks++;
             return ret;
         }
