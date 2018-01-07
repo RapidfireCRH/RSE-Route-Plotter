@@ -63,7 +63,7 @@ namespace getmeoutofhere
                         double dist = 0;
                         if (prev.name != null)
                             dist = prev.distance(x);
-                        bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z + ", " + dist);
+                        bldr.AppendLine(x.name + ", " + x.coord.x.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.y.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.z.ToString(CultureInfo.InvariantCulture) + ", " + dist.ToString(CultureInfo.InvariantCulture));
                         prev = x;
                     }
                     File.WriteAllText(start.name + "-" + destination.name + "route.csv", bldr.ToString());
@@ -91,7 +91,7 @@ namespace getmeoutofhere
                         double dist = 0;
                         if (prevbldr.name != null)
                             dist = prevbldr.distance(x);
-                        bldr.AppendLine(x.name + ", " + x.coord.x + ", " + x.coord.y + ", " + x.coord.z + ", " + dist);
+                        bldr.AppendLine(x.name + ", " + x.coord.x.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.y.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.z.ToString(CultureInfo.InvariantCulture) + ", " + dist.ToString(CultureInfo.InvariantCulture));
                         prev = x;
                     }
                     File.WriteAllText("zen-" + start.name + "route.csv", bldr.ToString());

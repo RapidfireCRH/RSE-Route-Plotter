@@ -118,7 +118,9 @@ namespace getmeoutofhere
             query.z_end = curr.coord.z < dest.coord.z ? dest.coord.z + dev : curr.coord.z + dev;
             m_dbConnection.Open();
             
-            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start + " and " + query.x_end + " and y BETWEEN " + query.y_start + " and " + query.y_end + " and z BETWEEN " + query.z_start + " and " + query.z_end;
+            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start.ToString(CultureInfo.InvariantCulture) + " and " + query.x_end.ToString(CultureInfo.InvariantCulture) 
+                + " and y BETWEEN " + query.y_start.ToString(CultureInfo.InvariantCulture) + " and " + query.y_end.ToString(CultureInfo.InvariantCulture) 
+                + " and z BETWEEN " + query.z_start.ToString(CultureInfo.InvariantCulture) + " and " + query.z_end.ToString(CultureInfo.InvariantCulture);
             //Console.WriteLine(curr.name + "|" + curr.coord.x+"|" + curr.coord.y+ "|" + curr.coord.z);
             //Console.WriteLine(dest.name + "|" + dest.coord.x + "|" + dest.coord.y + "|" + dest.coord.z);
             //Console.WriteLine(variation);
@@ -182,9 +184,9 @@ namespace getmeoutofhere
             {
                 star_st ret = new star_st();
                 ret.name = read["name"].ToString();
-                ret.coord.x = Double.Parse(read["x"].ToString());
-                ret.coord.y = Double.Parse(read["y"].ToString());
-                ret.coord.z = Double.Parse(read["z"].ToString());
+                ret.coord.x = Double.Parse(read["x"].ToString(), CultureInfo.InvariantCulture);
+                ret.coord.y = Double.Parse(read["y"].ToString(), CultureInfo.InvariantCulture);
+                ret.coord.z = Double.Parse(read["z"].ToString(), CultureInfo.InvariantCulture);
                 database.Add(ret);
             }
             m_dbConnection.Close();
@@ -216,7 +218,6 @@ namespace getmeoutofhere
         {
             if (firstrun)
                 return;
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             if (!File.Exists("systemsWithoutCoordinates.sqlite"))
                 throw new FileNotFoundException("DB not in local directory. Please download new database/ move database to current directory. Current Directory: " + Directory.GetCurrentDirectory());
             m_dbConnection = new SQLiteConnection("Data Source=systemsWithoutCoordinates.sqlite; Version=3;");
