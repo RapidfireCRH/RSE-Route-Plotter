@@ -191,6 +191,7 @@ namespace getmeoutofhere
         }
         public star_st searchbyname(string starname)
         {
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             string result = new System.Net.WebClient().DownloadString("https://www.edsm.net/api-v1/systems?systemName=" + starname + "&showCoordinates=1");
             if (result == "[]")
                 return new star_st();
