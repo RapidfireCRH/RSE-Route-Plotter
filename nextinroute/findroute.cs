@@ -1,35 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Globalization;
 using System.IO;
+using Npgsql;
 
 namespace getmeoutofhere
 {
     class findroute
     {
-        /// <summary>
-        ///               N
-        ///               |
-        ///               |
-        ///       Q3      |       Q2
-        ///      (-+)     |      (++)
-        ///               |
-        /// W----------------------------E
-        ///               |
-        ///               |
-        ///       Q4      |       Q1
-        ///      (--)     |      (+-)
-        ///               |
-        ///               S
-        /// Directions require a quadrent with an emphasis to make sure dev follows correct path
-        /// to determine emphasis, find longest distance of sepration (x, z). The other becomes the dev axis
-        /// </summary>
+        int version_major = 1;
+        int version_minor = 0;
+        string version_date = "6-Mar-2018";
 
-        enum emphasis { north_south, east_west };
-        enum direct { Q1, Q2, Q3, Q4 };
-        
-        SQLiteConnection m_dbConnection;
+        NpgsqlConnection conn = new NpgsqlConnection();
         List<star_st> database = new List<star_st>();
         bool firstrun = false;
         public struct coord_st
@@ -104,7 +87,7 @@ namespace getmeoutofhere
             }
             return saga;
         }
-        public star_st findnext(star_st curr, star_st dest, int variation=20, int min_dist=0)
+        public star_st findnext(star_st curr, star_st dest, int variation = 20, int min_dist = 0)
         {
             fstrun();
             double dist = curr.distance(dest);
@@ -116,18 +99,20 @@ namespace getmeoutofhere
             query.y_end = curr.coord.y < dest.coord.y ? dest.coord.y + dev : curr.coord.y + dev;
             query.z_start = curr.coord.z > dest.coord.z ? dest.coord.z - dev : curr.coord.z - dev;
             query.z_end = curr.coord.z < dest.coord.z ? dest.coord.z + dev : curr.coord.z + dev;
-            m_dbConnection.Open();
-            
-            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start.ToString(CultureInfo.InvariantCulture) + " and " + query.x_end.ToString(CultureInfo.InvariantCulture) 
-                + " and y BETWEEN " + query.y_start.ToString(CultureInfo.InvariantCulture) + " and " + query.y_end.ToString(CultureInfo.InvariantCulture) 
-                + " and z BETWEEN " + query.z_start.ToString(CultureInfo.InvariantCulture) + " and " + query.z_end.ToString(CultureInfo.InvariantCulture);
+            conn.Open();
+
+            string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start.ToString(CultureInfo.InvariantCulture) + " and " + query.x_end.ToString(CultureInfo.InvariantCulture)
+                + " and y BETWEEN " + query.y_start.ToString(CultureInfo.InvariantCulture) + " and " + query.y_end.ToString(CultureInfo.InvariantCulture)
+                + " and z BETWEEN " + query.z_start.ToString(CultureInfo.InvariantCulture) + " and " + query.z_end.ToString(CultureInfo.InvariantCulture)
+                + " and action_todo = 1;";
             //Console.WriteLine(curr.name + "|" + curr.coord.x+"|" + curr.coord.y+ "|" + curr.coord.z);
             //Console.WriteLine(dest.name + "|" + dest.coord.x + "|" + dest.coord.y + "|" + dest.coord.z);
             //Console.WriteLine(variation);
             //Console.WriteLine(min_dist);
             //Console.WriteLine(sql);
-            SQLiteCommand create = new SQLiteCommand(sql, m_dbConnection);
-            SQLiteDataReader read = create.ExecuteReader();
+            NpgsqlTransaction tran = conn.BeginTransaction();
+            NpgsqlCommand command = new NpgsqlCommand(sql, conn);
+            NpgsqlDataReader read = command.ExecuteReader();
             List<check_st> collect = new List<check_st>();
             while (read.Read())
             {
@@ -140,7 +125,7 @@ namespace getmeoutofhere
                 ret.angle = curr.angle(ret.star, dest);
                 collect.Add(ret);
             }
-            m_dbConnection.Close();
+            conn.Close();
             check_st temp = new check_st();
             temp.star = dest;
             temp.dist = dist;
@@ -151,7 +136,7 @@ namespace getmeoutofhere
                 if (collect[x].angle < variation)// || (collect[x].dist == 0 && collect[x].star.name != curr.name))
                     if (collect[x].dist > min_dist)
                         //if (checkstar(collect[x].star))
-                            return collect[x].star;
+                        return collect[x].star;
             return dest;//This will never be reached, but just in case
         }
         private DateTime lastchecked = DateTime.Now.AddHours(-1);
@@ -164,7 +149,7 @@ namespace getmeoutofhere
                 numofchecks = 0;
             }
             numofchecks++;
-            if(numofchecks < 6)
+            if (numofchecks < 6)
             {
                 string result = new System.Net.WebClient().DownloadString("https://www.edsm.net/api-v1/systems?systemName=" + check.name + "&showCoordinates=1");
                 if (!(result == "[]" || !result.Contains("coords")))
@@ -174,12 +159,15 @@ namespace getmeoutofhere
         }
         private void loaddb()
         {
+            if (!firstrun)
+                fstrun();
             if (database.Count != 0)
                 return;
-            m_dbConnection.Open();
-            string sql = "SELECT name, x, y, z FROM systems";
-            SQLiteCommand create = new SQLiteCommand(sql, m_dbConnection);
-            SQLiteDataReader read = create.ExecuteReader();
+            conn.Open();
+            string sql = "SELECT name, x, y, z FROM systems where action_todo = 1";
+            NpgsqlTransaction tran = conn.BeginTransaction();
+            NpgsqlCommand command = new NpgsqlCommand(sql, conn);
+            NpgsqlDataReader read = command.ExecuteReader();
             while (read.Read())
             {
                 star_st ret = new star_st();
@@ -189,7 +177,7 @@ namespace getmeoutofhere
                 ret.coord.z = Double.Parse(read["z"].ToString(), CultureInfo.InvariantCulture);
                 database.Add(ret);
             }
-            m_dbConnection.Close();
+            conn.Close();
         }
         public star_st searchbyname(string starname)
         {
@@ -200,7 +188,7 @@ namespace getmeoutofhere
                 return new star_st();
             star_st ret = new star_st();
             ret.name = starname;
-            ret.coord.x = Double.Parse((result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length))),CultureInfo.InvariantCulture);
+            ret.coord.x = Double.Parse((result.Substring(result.IndexOf("\"x\":") + "\"x\":".Length, result.IndexOf(",\"y\":") - (result.IndexOf("\"x\":") + "\"x\":".Length))), CultureInfo.InvariantCulture);
             ret.coord.y = Double.Parse((result.Substring(result.IndexOf(",\"y\":") + ",\"y\":".Length, result.IndexOf(",\"z\":") - (result.IndexOf(",\"y\":") + ",\"y\":".Length))), CultureInfo.InvariantCulture);
             ret.coord.z = Double.Parse((result.Substring(result.IndexOf(",\"z\":") + ",\"z\":".Length, result.IndexOf("}") - (result.IndexOf(",\"z\":") + ",\"z\":".Length))), CultureInfo.InvariantCulture);
             numofchecks++;
@@ -212,17 +200,16 @@ namespace getmeoutofhere
             if (result.Length < 13 || result.Substring(0, 13) != "{\"msgnum\":100")
                 return new star_st();
             numofchecks++;
-            return searchbyname(result.Substring(result.IndexOf(",\"system\":\"") + ",\"system\":\"".Length, result.IndexOf("\",\"firstDiscover")-(result.IndexOf(",\"system\":\"") + ",\"system\":\"".Length)));
+            return searchbyname(result.Substring(result.IndexOf(",\"system\":\"") + ",\"system\":\"".Length, result.IndexOf("\",\"firstDiscover") - (result.IndexOf(",\"system\":\"") + ",\"system\":\"".Length)));
         }
         private void fstrun()
         {
             if (firstrun)
                 return;
-            if (!File.Exists("systemsWithoutCoordinates.sqlite"))
-                throw new FileNotFoundException("DB not in local directory. Please download new database/ move database to current directory. Current Directory: " + Directory.GetCurrentDirectory());
-            m_dbConnection = new SQLiteConnection("Data Source=systemsWithoutCoordinates.sqlite; Version=3;");
+            conn = new NpgsqlConnection("SERVER=cyberlord.de; Port=5432; Database=edmc_rse_db; User ID=edmc_rse_user; Password=asdfplkjiouw3875948zksmdxnf;Timeout=12;Application Name=nextinroutev" + version_major + "." + version_minor + "|" + version_date + ";Keepalive=60;");
+
             firstrun = true;
         }
-        
+
     }
 }

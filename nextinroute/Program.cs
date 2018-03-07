@@ -19,7 +19,7 @@ namespace getmeoutofhere
         static int maxdev = 20;//route only
 
         //program toggle
-        enum state {route = 0, zen = 1 }
+        enum state { route = 0, zen = 1 }
         static state prog = state.route;
 
         //version
@@ -72,7 +72,7 @@ namespace getmeoutofhere
                     break;
                 case state.zen:
                     findroute.star_st zenret = start;
-                    while (list.Count!= numofjumps+1)
+                    while (list.Count != numofjumps + 1)
                     {
                         zenret = fr.zen(zenret, maxdist == 0 ? 18000 : maxdist);
                         Console.Clear();
