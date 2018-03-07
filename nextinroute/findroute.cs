@@ -9,7 +9,8 @@ namespace getmeoutofhere
     class findroute
     {
         int version_major = 1;
-        int version_minor = 0;
+        int version_minor = 2;
+        bool beta = true;
         string version_date = "6-Mar-2018";
 
         NpgsqlConnection conn = new NpgsqlConnection();
@@ -206,7 +207,7 @@ namespace getmeoutofhere
         {
             if (firstrun)
                 return;
-            conn = new NpgsqlConnection("SERVER=cyberlord.de; Port=5432; Database=edmc_rse_db; User ID=edmc_rse_user; Password=asdfplkjiouw3875948zksmdxnf;Timeout=12;Application Name=nextinroutev" + version_major + "." + version_minor + "|" + version_date + ";Keepalive=60;");
+            conn = new NpgsqlConnection("SERVER=cyberlord.de; Port=5432; Database=edmc_rse_db; User ID=edmc_rse_user; Password=asdfplkjiouw3875948zksmdxnf;Timeout=12;Application Name=nextinroutev" + version_major + "." + version_minor + (beta==true?"b|":"|") + version_date + ";Keepalive=60;");
 
             firstrun = true;
         }

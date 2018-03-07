@@ -23,7 +23,7 @@ namespace getmeoutofhere
         static state prog = state.route;
 
         //version
-        static DateTime create_date = new DateTime(2018, 1, 2);
+        static DateTime create_date = new DateTime(2018, 3, 6);
         static int ver_major = 1;
         static int ver_minor = 2;
         static void Main(string[] args)
