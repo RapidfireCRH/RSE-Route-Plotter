@@ -105,7 +105,7 @@ namespace getmeoutofhere
             string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start.ToString(CultureInfo.InvariantCulture) + " and " + query.x_end.ToString(CultureInfo.InvariantCulture)
                 + " and y BETWEEN " + query.y_start.ToString(CultureInfo.InvariantCulture) + " and " + query.y_end.ToString(CultureInfo.InvariantCulture)
                 + " and z BETWEEN " + query.z_start.ToString(CultureInfo.InvariantCulture) + " and " + query.z_end.ToString(CultureInfo.InvariantCulture)
-                + " and action_todo = 1;";
+                + " and action_todo = 1 and deleted_at is NULL;";
             //Console.WriteLine(curr.name + "|" + curr.coord.x+"|" + curr.coord.y+ "|" + curr.coord.z);
             //Console.WriteLine(dest.name + "|" + dest.coord.x + "|" + dest.coord.y + "|" + dest.coord.z);
             //Console.WriteLine(variation);
@@ -165,7 +165,7 @@ namespace getmeoutofhere
             if (database.Count != 0)
                 return;
             conn.Open();
-            string sql = "SELECT name, x, y, z FROM systems where action_todo = 1";
+            string sql = "SELECT name, x, y, z FROM systems where action_todo = 1 and deleted_at is NULL;";
             NpgsqlTransaction tran = conn.BeginTransaction();
             NpgsqlCommand command = new NpgsqlCommand(sql, conn);
             NpgsqlDataReader read = command.ExecuteReader();
