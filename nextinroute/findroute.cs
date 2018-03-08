@@ -10,8 +10,8 @@ namespace getmeoutofhere
     {
         int version_major = 1;
         int version_minor = 2;
-        bool beta = true;
-        string version_date = "6-Mar-2018";
+        bool beta = false;
+        string version_date = "8-Mar-2018";
 
         NpgsqlConnection conn = new NpgsqlConnection();
         List<star_st> database = new List<star_st>();
