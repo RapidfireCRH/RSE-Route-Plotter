@@ -14,6 +14,7 @@ namespace getmeoutofhere
         static findroute fr = new findroute();
         static findroute.star_st start = new findroute.star_st();
         static findroute.star_st destination = new findroute.star_st();
+        static string savefilename = "DEFAULT";
         static int numofjumps = 20;//Zen only
         static int maxdist = 0;//route only
         static int maxdev = 20;//route only
@@ -66,9 +67,19 @@ namespace getmeoutofhere
                         bldr.AppendLine(x.name + ", " + x.coord.x.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.y.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.z.ToString(CultureInfo.InvariantCulture) + ", " + dist.ToString(CultureInfo.InvariantCulture));
                         prev = x;
                     }
-                    File.WriteAllText(start.name + "-" + destination.name + "route.csv", bldr.ToString());
-                    Console.WriteLine();
-                    Console.WriteLine("This is also available here: " + start.name + "-" + destination.name + "route.csv");
+                    if (savefilename == "DEFAULT")
+                        savefilename = start.name + "-" + destination.name + "route.csv";
+                    try
+                    {
+                        File.WriteAllText(savefilename, bldr.ToString());
+                        Console.WriteLine();
+                        Console.WriteLine("This is also available here: " + savefilename);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Could not write file. " + e.Message);
+                    }
                     break;
                 case state.zen:
                     findroute.star_st zenret = start;
@@ -94,9 +105,19 @@ namespace getmeoutofhere
                         bldr.AppendLine(x.name + ", " + x.coord.x.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.y.ToString(CultureInfo.InvariantCulture) + ", " + x.coord.z.ToString(CultureInfo.InvariantCulture) + ", " + dist.ToString(CultureInfo.InvariantCulture));
                         prev = x;
                     }
-                    File.WriteAllText("zen-" + start.name + "route.csv", bldr.ToString());
-                    Console.WriteLine();
-                    Console.WriteLine("This is also available here: zen-" + start.name + "route.csv", bldr.ToString());
+                    if (savefilename == "DEFAULT")
+                        savefilename = "zen-" + start.name + "route.csv";
+                    try
+                    {
+                        File.WriteAllText(savefilename, bldr.ToString());
+                        Console.WriteLine();
+                        Console.WriteLine("This is also available here: "+savefilename);
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Could not write file. "+e.Message);
+                    }
                     break;
             }
         }
@@ -148,6 +169,10 @@ namespace getmeoutofhere
                             break;
                         case "-route":
                             prog = state.route;
+                            i++;
+                            break;
+                        case "-t":
+                            savefilename = args[++i];
                             i++;
                             break;
                         default:
