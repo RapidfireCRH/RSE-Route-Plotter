@@ -9,9 +9,9 @@ namespace getmeoutofhere
     class findroute
     {
         int version_major = 1;
-        int version_minor = 3;
+        int version_minor = 4;
         bool beta = true;
-        string version_date = "8-Mar-2018";
+        string version_date = "06-JUL-2018";
 
         NpgsqlConnection conn = new NpgsqlConnection();
         List<star_st> database = new List<star_st>();
@@ -36,7 +36,7 @@ namespace getmeoutofhere
                 distblk.c = this.distance(reference);
                 distblk.b = this.distance(other);
                 distblk.a = other.distance(reference);
-                return Math.Acos((Math.Pow(distblk.a, 2) - Math.Pow(distblk.b, 2) - Math.Pow(distblk.c, 2)) / ((-2) * distblk.b * distblk.c)) * (180 / Math.PI);
+                return Math.Acos((Math.Pow(distblk.a, 2) - Math.Pow(distblk.b, 2) - Math.Pow(distblk.c, 2)) / ((-2) * distblk.b * distblk.c)) * (180 / Math.PI);//(a^2-b^2-c^2)/2bc
             }
         }
         private struct check_st : IComparable<check_st>
@@ -208,7 +208,7 @@ namespace getmeoutofhere
             if (firstrun)
                 return;
             conn = new NpgsqlConnection("SERVER=cyberlord.de; Port=5432; Database=edmc_rse_db; User ID=edmc_rse_user; Password=asdfplkjiouw3875948zksmdxnf;Timeout=12;Application Name=nextinroutev" + version_major + "." + version_minor + (beta==true?"b|":"|") + version_date + ";Keepalive=60;");
-
+            //"https://raw.githubusercontent.com/RapidfireCRH/nextinroute/master/version"
             firstrun = true;
         }
 
