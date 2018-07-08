@@ -218,7 +218,7 @@ namespace getmeoutofhere
             if (!beta)
             {
                 temp = new System.Net.WebClient().DownloadString("https://raw.githubusercontent.com/RapidfireCRH/nextinroute/master/version");
-                if (temp != (version_major + "." + version_minor + " " + version_date))
+                if (temp.Substring(0, temp.Length - 1) != (version_major + "." + version_minor + " " + version_date))
                 {
                     Console.Write("Newer version available. Current Version:" + version_major + "." + version_minor + " " + version_date + ". Latest version: " + temp);
                     Thread.Sleep(6000);
