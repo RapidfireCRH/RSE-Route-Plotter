@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using Npgsql;
 
 namespace getmeoutofhere
@@ -11,7 +12,7 @@ namespace getmeoutofhere
         int version_major = 1;
         int version_minor = 4;
         bool beta = true;
-        string version_date = "06-JUL-2018";
+        string version_date = "07-JUL-2018";
 
         NpgsqlConnection conn = new NpgsqlConnection();
         List<star_st> database = new List<star_st>();
@@ -208,8 +209,30 @@ namespace getmeoutofhere
             if (firstrun)
                 return;
             conn = new NpgsqlConnection("SERVER=cyberlord.de; Port=5432; Database=edmc_rse_db; User ID=edmc_rse_user; Password=asdfplkjiouw3875948zksmdxnf;Timeout=12;Application Name=nextinroutev" + version_major + "." + version_minor + (beta==true?"b|":"|") + version_date + ";Keepalive=60;");
-            //"https://raw.githubusercontent.com/RapidfireCRH/nextinroute/master/version"
+            versioncheck();
             firstrun = true;
+        }
+        public void versioncheck()
+        {
+            string temp = "";
+            if (!beta)
+            {
+                temp = new System.Net.WebClient().DownloadString("https://raw.githubusercontent.com/RapidfireCRH/nextinroute/master/version");
+                if (temp.Substring(0, temp.Length - 1) != (version_major + "." + version_minor + " " + version_date))
+                {
+                    Console.Write("Newer version available. Current Version:" + version_major + "." + version_minor + " " + version_date + ". Latest version: " + temp);
+                    Thread.Sleep(6000);
+                }
+            }
+            else
+            {
+                temp = new System.Net.WebClient().DownloadString("https://raw.githubusercontent.com/RapidfireCRH/nextinroute/Dev/version");
+                if (temp.Substring(0, temp.Length - 1) != (version_major + "." + version_minor + "b " + version_date))
+                {
+                    Console.Write("Newer version available. Current Version:" + version_major + "." + version_minor + "b " + version_date + ". Latest version: " + temp);
+                    Thread.Sleep(6000);
+                }
+            }
         }
 
     }
