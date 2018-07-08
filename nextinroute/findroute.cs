@@ -10,8 +10,8 @@ namespace getmeoutofhere
     class findroute
     {
         int version_major = 1;
-        int version_minor = 4;
-        bool beta = true;
+        int version_minor = 3;
+        bool beta = false;
         string version_date = "07-JUL-2018";
 
         NpgsqlConnection conn = new NpgsqlConnection();
