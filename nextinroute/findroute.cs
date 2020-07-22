@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
 using Npgsql;
 
@@ -9,10 +10,10 @@ namespace getmeoutofhere
 {
     class findroute
     {
-        int version_major = 1;
-        int version_minor = 3;
+        int version_major = 2;
+        int version_minor = 0;
         bool beta = false;
-        string version_date = "07-JUL-2018";
+        string version_date = "21-JUL-2020";
 
         NpgsqlConnection conn = new NpgsqlConnection();
         List<star_st> database = new List<star_st>();
@@ -65,6 +66,12 @@ namespace getmeoutofhere
             public double b; //curr to db star
             public double c; //curr to dest
         }
+        private struct div_st
+        {
+            public double x;
+            public double y;
+            public double z;
+        }
         Random rnd = new Random();
         public star_st zen(star_st start, int distance = 18000)
         {
@@ -92,27 +99,32 @@ namespace getmeoutofhere
         public star_st findnext(star_st curr, star_st dest, int variation = 20, int min_dist = 0)
         {
             fstrun();
+            div_st div = new div_st();
+            div_st dir = new div_st();
+            div.x = dest.coord.x - curr.coord.x;
+            div.y = dest.coord.y - curr.coord.y;
+            div.z = dest.coord.z - curr.coord.z;
+            dir.x = div.x >= 0 ? 1 : -1;
+            dir.y = div.y >= 0 ? 1 : -1;
+            dir.z = div.z >= 0 ? 1 : -1;
             double dist = curr.distance(dest);
-            double dev = dist / 3;
+            double jumps = dist / 400;
+            if (dist < min_dist)
+                return dest;
             coord_block_st query = new coord_block_st();
-            query.x_start = curr.coord.x > dest.coord.x ? dest.coord.x - dev : curr.coord.x - dev;
-            query.x_end = curr.coord.x < dest.coord.x ? dest.coord.x + dev : curr.coord.x + dev;
-            query.y_start = curr.coord.y > dest.coord.y ? dest.coord.y - dev : curr.coord.y - dev;
-            query.y_end = curr.coord.y < dest.coord.y ? dest.coord.y + dev : curr.coord.y + dev;
-            query.z_start = curr.coord.z > dest.coord.z ? dest.coord.z - dev : curr.coord.z - dev;
-            query.z_end = curr.coord.z < dest.coord.z ? dest.coord.z + dev : curr.coord.z + dev;
+            query.x_start = curr.coord.x + (div.x / jumps) + (dir.x * min_dist / 3) - 200;
+            query.x_end = curr.coord.x + (div.x / jumps) + (dir.x * min_dist / 3) + 200;
+            query.y_start = curr.coord.y + (div.y / jumps) - 200;
+            query.y_end = curr.coord.y + (div.y / jumps) + 200;
+            query.z_start = curr.coord.z + (div.z / jumps) + (dir.z * min_dist / 3) - 200;
+            query.z_end = curr.coord.z + (div.z / jumps) + (dir.z * min_dist / 3) + 200;
             conn.Open();
 
             string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start.ToString(CultureInfo.InvariantCulture) + " and " + query.x_end.ToString(CultureInfo.InvariantCulture)
                 + " and y BETWEEN " + query.y_start.ToString(CultureInfo.InvariantCulture) + " and " + query.y_end.ToString(CultureInfo.InvariantCulture)
                 + " and z BETWEEN " + query.z_start.ToString(CultureInfo.InvariantCulture) + " and " + query.z_end.ToString(CultureInfo.InvariantCulture)
                 + " and action_todo = 1 and deleted_at is NULL;";
-            //Console.WriteLine(curr.name + "|" + curr.coord.x+"|" + curr.coord.y+ "|" + curr.coord.z);
-            //Console.WriteLine(dest.name + "|" + dest.coord.x + "|" + dest.coord.y + "|" + dest.coord.z);
-            //Console.WriteLine(variation);
-            //Console.WriteLine(min_dist);
-            //Console.WriteLine(sql);
-            NpgsqlTransaction tran = conn.BeginTransaction();
+
             NpgsqlCommand command = new NpgsqlCommand(sql, conn);
             NpgsqlDataReader read = command.ExecuteReader();
             List<check_st> collect = new List<check_st>();
@@ -141,6 +153,8 @@ namespace getmeoutofhere
                         return collect[x].star;
             return dest;//This will never be reached, but just in case
         }
+
+
         private DateTime lastchecked = DateTime.Now.AddHours(-1);
         private int numofchecks = 0;
         private bool checkstar(star_st check)
@@ -208,7 +222,7 @@ namespace getmeoutofhere
         {
             if (firstrun)
                 return;
-            conn = new NpgsqlConnection("SERVER=cyberlord.de; Port=5432; Database=edmc_rse_db; User ID=edmc_rse_user; Password=asdfplkjiouw3875948zksmdxnf;Timeout=12;Application Name=nextinroutev" + version_major + "." + version_minor + (beta==true?"b|":"|") + version_date + ";Keepalive=60;");
+            conn = new NpgsqlConnection("SERVER=cyberlord.de; Port=5432; Database=edmc_rse_db; User ID=edmc_rse_user; Password=asdfplkjiouw3875948zksmdxnf;Timeout=12;Application Name=nextinroutev" + version_major + "." + version_minor + (beta == true ? "b|" : "|") + version_date + ";Keepalive=60;");
             versioncheck();
             firstrun = true;
         }
