@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using System.Web;
 using Npgsql;
 
 namespace getmeoutofhere
@@ -107,16 +108,16 @@ namespace getmeoutofhere
             dir.y = div.y >= 0 ? 1 : -1;
             dir.z = div.z >= 0 ? 1 : -1;
             double dist = curr.distance(dest);
-            double jumps = dist / 400;
+            double jumps = dist / 1000;
             if (dist < min_dist)
                 return dest;
             coord_block_st query = new coord_block_st();
-            query.x_start = curr.coord.x + (div.x / jumps) + (dir.x * min_dist / 3) - 200;
-            query.x_end = curr.coord.x + (div.x / jumps) + (dir.x * min_dist / 3) + 200;
+            query.x_start = curr.coord.x + (div.x / jumps) + (dir.x * min_dist / 3) - 1000;
+            query.x_end = curr.coord.x + (div.x / jumps) + (dir.x * min_dist / 3) + 1000;
             query.y_start = curr.coord.y + (div.y / jumps) - 200;
             query.y_end = curr.coord.y + (div.y / jumps) + 200;
-            query.z_start = curr.coord.z + (div.z / jumps) + (dir.z * min_dist / 3) - 200;
-            query.z_end = curr.coord.z + (div.z / jumps) + (dir.z * min_dist / 3) + 200;
+            query.z_start = curr.coord.z + (div.z / jumps) + (dir.z * min_dist / 3) - 1000;
+            query.z_end = curr.coord.z + (div.z / jumps) + (dir.z * min_dist / 3) + 1000;
             conn.Open();
 
             string sql = "SELECT name, x, y, z FROM systems where x BETWEEN " + query.x_start.ToString(CultureInfo.InvariantCulture) + " and " + query.x_end.ToString(CultureInfo.InvariantCulture)
@@ -139,6 +140,7 @@ namespace getmeoutofhere
                 collect.Add(ret);
             }
             conn.Close();
+
             check_st temp = new check_st();
             temp.star = dest;
             temp.dist = dist;
@@ -196,7 +198,7 @@ namespace getmeoutofhere
         }
         public star_st searchbyname(string starname)
         {
-            string result = new System.Net.WebClient().DownloadString("https://www.edsm.net/api-v1/systems?systemName=" + starname + "&showCoordinates=1");
+            string result = new System.Net.WebClient().DownloadString("https://www.edsm.net/api-v1/systems?systemName=" + HttpUtility.UrlEncode(starname) + "&showCoordinates=1");
             if (result == "[]")
                 return new star_st();
             if (!result.Contains("coords"))
